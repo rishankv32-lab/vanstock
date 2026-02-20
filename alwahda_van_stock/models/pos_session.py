@@ -14,17 +14,19 @@ class PosSession(models.Model):
             return self.config_id.picking_type_id.default_location_src_id
         return False
 
-    def _get_primary_warehouse_location(self):
-        """Pick a warehouse stock location flagged with is_warehouse_location.
-        """
+    def _get_warehouse_locations(self):
+        """Return all internal stock locations marked as warehouse locations."""
 
-        # 1) Prefer location tagged for this company
-        location = self.env["stock.location"].search([
+        return self.env["stock.location"].search([
             ("is_warehouse_location", "=", True),
             ("usage", "=", "internal"),
         ])
 
-        return location
+    def _get_primary_warehouse_location(self):
+        """Return a single location to be used as source/destination in transfers."""
+
+        locations = self._get_warehouse_locations()
+        return locations[:1]
 
     def get_warehouse_stock_products(self):
         """Get products available in warehouse for van request
@@ -32,9 +34,12 @@ class PosSession(models.Model):
         Fetches products from warehouse location marked with is_warehouse_location if set,
         """
 
-        warehouse_location = self._get_primary_warehouse_location( )
-        if not warehouse_location:
-            return []
+        warehouse_locations = self._get_warehouse_locations()
+        if not warehouse_locations:
+            return {
+                'products': [],
+                'warehouse_locations': [],
+            }
 
         # Get product IDs that are available in POS
         pos_product_ids = self.env['product.product'].search([
@@ -42,7 +47,7 @@ class PosSession(models.Model):
         ]).ids
 
         quants = self.env['stock.quant'].search([
-            ('location_id', '=', warehouse_location.id),
+            ('location_id', 'in', warehouse_locations.ids),
             ('quantity', '>', 0),
             ('product_id', 'in', pos_product_ids),
         ])
@@ -64,7 +69,13 @@ class PosSession(models.Model):
                     'uom': quant.product_id.uom_id.name,
                 }
 
-        return list(product_dict.values())
+        return {
+            'products': list(product_dict.values()),
+            'warehouse_locations': [{
+                'id': location.id,
+                'name': location.display_name,
+            } for location in warehouse_locations],
+        }
 
     def create_van_request_from_pos(self, request_type, lines):
         """Create van request from POS
@@ -105,7 +116,7 @@ class PosSession(models.Model):
         if not warehouse:
             raise UserError("No warehouse found. Please configure warehouse in POS Operation Type settings.")
 
-        warehouse_location = self._get_primary_warehouse_location(warehouse)
+        warehouse_location = self._get_primary_warehouse_location()
         _logger.info("Warehouse Stock Location (flagged or default): %s (ID: %s)", warehouse_location.display_name if warehouse_location else None, warehouse_location.id if warehouse_location else None)
 
         if not warehouse_location:
