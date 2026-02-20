@@ -36,10 +36,7 @@ class PosSession(models.Model):
 
         warehouse_locations = self._get_warehouse_locations()
         if not warehouse_locations:
-            return {
-                'products': [],
-                'warehouse_locations': [],
-            }
+            return []
 
         # Get product IDs that are available in POS
         pos_product_ids = self.env['product.product'].search([
@@ -69,13 +66,7 @@ class PosSession(models.Model):
                     'uom': quant.product_id.uom_id.name,
                 }
 
-        return {
-            'products': list(product_dict.values()),
-            'warehouse_locations': [{
-                'id': location.id,
-                'name': location.display_name,
-            } for location in warehouse_locations],
-        }
+        return list(product_dict.values())
 
     def create_van_request_from_pos(self, request_type, lines):
         """Create van request from POS
