@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <!-- Van Stock Screen Template -->
+    <t t-name="alwahda_van_stock.VanStockScreen">
+        <div class="van-stock-screen d-flex flex-column h-100 bg-200">
+            <!-- Header -->
+            <div class="screen-header d-flex align-items-center p-2 border-bottom bg-white">
+                <button class="btn btn-secondary me-3" t-on-click="back">
+                    <i class="fa fa-arrow-left me-1"/> Back
+                </button>
+                <h4 class="mb-0 me-4" t-esc="screenTitle"/>
+                 <!-- Category Pills - Only visible on New Request tab -->
+<!--                <div class="d-flex flex-wrap gap-1 align-items-center ms-auto pe-2" t-if="state.activeTab === 'new'">-->
+<!--                    <button t-attf-class="btn btn-sm {{ !state.selectedCategory ? 'btn-primary' : 'btn-outline-secondary' }}"-->
+<!--                            t-on-click="() => this.setCategory(null)">-->
+<!--                        All-->
+<!--                    </button>-->
+<!--                    <t t-foreach="rootCategories" t-as="category" t-key="category.id">-->
+<!--                        <button t-attf-class="btn btn-sm {{ state.selectedCategory?.id === category.id ? 'btn-primary' : 'btn-outline-secondary' }}"-->
+<!--                                t-on-click="() => this.setCategory(category)">-->
+<!--                            <t t-esc="category.name"/>-->
+<!--                        </button>-->
+<!--                    </t>-->
+            </div>
+
+
+            <div class="d-flex border-bottom bg-white">
+                <!-- Left 50%: Tab Buttons -->
+                <div class="d-flex" style="flex-basis: 50%; max-width: 50%;">
+                    <button t-attf-class="btn btn-link px-4 py-2 rounded-0 {{ state.activeTab === 'new' ? 'border-bottom border-primary border-3 text-primary fw-bold' : 'text-muted' }}"
+                            t-on-click="() => this.setActiveTab('new')">
+                        <i class="fa fa-plus me-1"/> New Request
+                    </button>
+                    <button t-attf-class="btn btn-link px-4 py-2 rounded-0 {{ state.activeTab === 'history' ? 'border-bottom border-primary border-3 text-primary fw-bold' : 'text-muted' }}"
+                            t-on-click="() => this.setActiveTab('history')">
+                        <i class="fa fa-history me-1"/> Request History
+                    </button>
+                </div>
+
+                <!-- Right 50%: Search Bar - Only visible on New Request tab -->
+                <div class="d-flex align-items-center justify-content-end pe-2" style="flex-basis: 50%; max-width: 50%;" t-if="state.activeTab === 'new'">
+                    <div class="flex-grow-1">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white">
+                                <i class="fa fa-search text-muted"/>
+                            </span>
+                            <input type="text"
+                                   class="form-control"
+                                   placeholder="Search products by name, code or barcode..."
+                                   t-att-value="state.searchWord"
+                                   t-on-input="updateSearchWord"/>
+                            <button class="btn btn-outline-secondary" t-on-click="clearSearch" t-if="state.searchWord">
+                                <i class="fa fa-times"/>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="screen-content flex-grow-1 overflow-auto p-3">
+
+                <!-- New Request Tab -->
+                <t t-if="state.activeTab === 'new'">
+                    <!-- Split Layout Container -->
+                    <div class="d-flex h-100 gap-3">
+
+                        <!-- LEFT SIDE: Request Products Table -->
+                        <div class="flex-fill bg-white rounded shadow-sm d-flex flex-column" style="flex-basis: 50%; max-width: 50%;">
+                            <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-list me-2"/>Request Items
+                                </h5>
+                                <span t-if="state.products.length > 0">
+                                    <t t-esc="state.products.filter(p => p.selected).length"/> / <t t-esc="state.products.length"/> selected
+                                </span>
+                            </div>
+
+                            <t t-if="state.products.length === 0">
+                                <div class="d-flex flex-column align-items-center justify-content-center flex-grow-1 text-muted p-4">
+                                    <i class="fa fa-shopping-cart fa-3x mb-3 opacity-50"/>
+                                    <h6>No products added</h6>
+                                    <p class="text-center small">Search and click on products from the right panel to add them to your request.</p>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="flex-grow-1 overflow-auto">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="table-light sticky-top">
+                                            <tr>
+                                                <th style="width: 40px;" class="text-center"> </th>
+                                                <th>Product</th>
+                                                <th class="text-center" style="width: 100px;">Qty</th>
+                                                <th style="width: 70px;">UoM</th>
+                                                <th style="width: 40px;"> </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="state.products" t-as="product" t-key="product.id">
+                                                <tr t-att-class="{'table-primary': product.selected}">
+                                                    <td class="text-center align-middle" t-on-click="() => this.toggleSelect(product)" style="cursor: pointer;">
+                                                        <i t-attf-class="fa fa-lg {{ product.selected ? 'fa-check-square text-primary' : 'fa-square-o text-muted' }}"/>
+                                                    </td>
+                                                    <td class="align-middle" t-on-click="() => this.toggleSelect(product)" style="cursor: pointer;">
+                                                        <strong t-esc="product.name"/>
+                                                    </td>
+                                                    <td class="align-middle">
+                                                        <input type="number"
+                                                               class="form-control form-control-sm text-center"
+                                                               t-att-value="product.transferQty"
+                                                               min="0.01"
+                                                               step="1"
+                                                               t-att-disabled="!product.selected"
+                                                               t-on-change="(e) => this.updateQuantity(product, e)"/>
+                                                    </td>
+                                                    <td class="align-middle text-muted small" t-esc="product.uom"/>
+                                                    <td class="align-middle text-center">
+                                                        <button class="btn btn-sm btn-outline-danger" t-on-click="() => this.removeProduct(product)" title="Remove">
+                                                            <i class="fa fa-trash"/>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </t>
+
+                            <!-- Submit Button at bottom of left panel -->
+                            <t t-if="state.products.length > 0">
+                                <div class="p-3 border-top bg-light">
+                                    <button class="btn btn-primary w-100"
+                                            t-on-click="submitRequest"
+                                            t-att-disabled="state.loading || state.products.filter(p => p.selected).length === 0">
+                                        <t t-if="state.loading">
+                                            <i class="fa fa-spinner fa-spin me-1"/>
+                                        </t>
+                                        <t t-else="">
+                                            <i class="fa fa-paper-plane me-1"/>
+                                        </t>
+                                        Submit Request
+                                    </button>
+                                </div>
+                            </t>
+                        </div>
+
+                        <!-- RIGHT SIDE: Product Grid -->
+                        <div class="flex-fill d-flex flex-column" style="flex-basis: 50%; max-width: 50%;">
+                            <!-- Products Grid -->
+                            <div class="bg-white rounded shadow-sm flex-grow-1 overflow-auto p-2">
+                                <t t-if="productsToDisplay.length === 0">
+                                    <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
+                                        <i class="fa fa-search fa-3x mb-3 opacity-50"/>
+                                        <h6>No products found</h6>
+                                        <p class="small">Try a different search term</p>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="row g-2">
+                                        <t t-foreach="productsToDisplay" t-as="product" t-key="product.id">
+                                            <div class="col-6 col-md-4 col-lg-3">
+                                                <div class="card product-card h-100 border"
+                                                     style="cursor: pointer; transition: all 0.2s;"
+                                                     t-on-click="() => this.addProductToRequest(product)"
+                                                     t-att-class="{'border-primary bg-light': state.products.some(p => p.id === product.id)}">
+                                                    <div class="card-body p-2 text-center">
+                                                        <img t-att-src="getProductImage(product)"
+                                                             class="img-fluid mb-2"
+                                                             style="max-height: 60px; object-fit: contain;"
+                                                             t-att-alt="product.display_name"
+                                                             loading="lazy"/>
+                                                        <div class="small fw-bold text-truncate" t-att-title="product.display_name">
+                                                            <t t-esc="product.display_name"/>
+                                                        </div>
+                                                        <div class="text-muted small" t-if="product.default_code">
+                                                            [<t t-esc="product.default_code"/>]
+                                                        </div>
+                                                        <!-- Show indicator if already added -->
+                                                        <t t-if="state.products.some(p => p.id === product.id)">
+                                                            <span class="badge bg-success mt-1">
+                                                                <i class="fa fa-check me-1"/>Added
+                                                            </span>
+                                                        </t>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+
+                    </div>
+                </t>
+
+                <!-- History Tab -->
+                <t t-if="state.activeTab === 'history'">
+                    <t t-if="state.requests.length === 0">
+                        <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
+                            <i class="fa fa-inbox fa-4x mb-3 opacity-50"/>
+                            <h5>No requests found</h5>
+                            <p>Your request history will appear here.</p>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div class="bg-white rounded overflow-hidden border">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="text-muted fw-normal py-2 ps-3" style="width: 140px;">Request</th>
+                                        <th class="text-muted fw-normal py-2" style="width: 120px;">Date</th>
+                                        <th class="text-muted fw-normal py-2" style="width: 150px;">User</th>
+                                        <th class="text-muted fw-normal py-2">Products</th>
+                                        <th class="text-muted fw-normal py-2 text-center pe-3" style="width: 110px;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="state.requests" t-as="request" t-key="request.id">
+                                        <tr>
+                                            <td class="ps-3 py-2">
+                                                <span class="fw-bold"><t t-esc="request.name"/></span>
+                                            </td>
+                                            <td class="py-2 text-muted">
+                                                <t t-esc="request.request_date || 'Pending'"/>
+                                            </td>
+                                            <td class="py-2 text-muted">
+                                                <t t-esc="request.user"/>
+                                            </td>
+                                            <td class="py-2">
+                                                <t t-foreach="request.lines" t-as="line" t-key="line.product_id">
+                                                    <span class="badge text-dark border bg-light me-1" style="font-size: 13px; font-weight: 500;">
+                                                        <t t-esc="line.product_name"/>
+                                                        <span class="badge bg-secondary ms-1">
+                                                            <t t-esc="line.quantity"/> <t t-esc="line.uom"/>
+                                                        </span>
+                                                    </span>
+                                                </t>
+                                            </td>
+                                            <td class="text-center pe-3 py-2">
+                                                <span t-att-class="getStateClass(request.state)"
+                                                      style="border-radius: 20px; padding: 4px 12px;"
+                                                      t-esc="getStateLabel(request.state)"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <!-- Add Van Item Request to Burger Menu -->
+    <t t-name="alwahda_van_stock.NavbarDropdownItems" t-inherit="point_of_sale.Navbar" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('pos-burger-menu-items')]" position="inside">
+            <span class="o-dropdown-item dropdown-item o-navigable"
+                  role="menuitem" tabindex="0"
+                  t-on-click="() => { console.log('[VanStockScreen] BURGER MENU CLICKED - Van Item Request'); this.pos.navigate('VanStockScreen'); }">
+                Van Item Request
+            </span>
+        </xpath>
+    </t>
+
+</templates>

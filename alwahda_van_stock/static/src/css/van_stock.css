@@ -1,0 +1,118 @@
+.van-stock-screen {
+    background-color: #f8f9fa;
+}
+
+.van-stock-screen .screen-header h4 {
+    font-weight: 600;
+}
+
+.van-stock-screen .table th {
+    font-weight: 600;
+    white-space: nowrap;
+    border-top: none;
+}
+
+.van-stock-screen .form-control-sm {
+    max-width: 100px;
+    margin: 0 auto;
+}
+
+.van-stock-screen .table-primary {
+    background-color: #e7f1ff !important;
+}
+
+.van-stock-screen .card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.van-stock-screen .card:hover {
+    transform: translateY(-2px);
+}
+
+.van-stock-screen .screen-footer {
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+}
+
+.van-stock-screen .btn-link {
+    text-decoration: none;
+}
+
+.van-stock-screen .btn-link:hover {
+    background-color: #f0f0f0;
+}
+
+.van-stock-screen .opacity-50 {
+    opacity: 0.5;
+}
+
+/* Split Layout Styles */
+.van-stock-screen .leftpane {
+    background: #fff;
+}
+
+.van-stock-screen .rightpane {
+    background: #f8f9fa;
+}
+
+/* Product Card Styles */
+.van-stock-screen .product-card {
+    transition: all 0.2s ease;
+    border: 1px solid #dee2e6;
+}
+
+.van-stock-screen .product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+    border-color: #007bff;
+}
+
+.van-stock-screen .product-card .card-img-top {
+    background-color: #f8f9fa;
+}
+
+.van-stock-screen .product-card .card-body {
+    min-height: 50px;
+}
+
+/* Category Bar */
+.van-stock-screen .category-bar {
+    flex-wrap: nowrap !important;
+}
+
+.van-stock-screen .category-bar::-webkit-scrollbar {
+    height: 4px;
+}
+
+.van-stock-screen .category-bar::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 2px;
+}
+
+/* Product Grid */
+.van-stock-screen .product-grid {
+    background: #f8f9fa;
+}
+
+/* Search Input */
+.van-stock-screen .input-group .form-control:focus {
+    box-shadow: none;
+    border-color: #ced4da;
+}
+
+.van-stock-screen .input-group-text {
+    border-color: #ced4da;
+}
+
+/* Request Table */
+.van-stock-screen .leftpane .table {
+    font-size: 0.9rem;
+}
+
+.van-stock-screen .leftpane .table thead th {
+    background: #f8f9fa;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+

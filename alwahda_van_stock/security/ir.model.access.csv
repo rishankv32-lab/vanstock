@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+alwahda_van_stock.access_stock_van_request,access_stock_van_request,alwahda_van_stock.model_stock_van_request,base.group_user,1,1,1,1
+alwahda_van_stock.access_stock_van_product_lines,access_stock_van_product_lines,alwahda_van_stock.model_stock_van_product_lines,base.group_user,1,1,1,1
